@@ -1,13 +1,13 @@
 import torch
-from data.digit_five import DigitFiveLoader
-from models.cnn import DigitFiveCNN
+from data.msk import MSKLoader
+from models.cnn import MSKCNN
 from utils.pruning import structured_prune
 from utils.quantization import QuantizedModel
 from utils.sparsification import TopKSparsifier
 from utils.dp_smppc import DPSMPC
 
-def train_digit_five(args):
-    model = DigitFiveCNN()
+def msk(args):
+    model = MSKCNN()
     if args.prune:
         model = structured_prune(model, sparsity=0.4)
     if args.quantize:
@@ -19,7 +19,7 @@ def train_digit_five(args):
         model = DPSMPC(model, epsilon=2)
 
     # Training logic
-    loader = DigitFiveLoader(root="/home/phd/Datasets/Digit-Five")
+    loader = MSKLoader(root="/home/phd/Datasets/MSK")
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     for epoch in range(1000):  # E=5 local epochs
         for x, y in loader:
@@ -29,8 +29,8 @@ def train_digit_five(args):
             loss.backward()
             optimizer.step()
 
-    torch.save(model.state_dict(), "checkpoints/digit_five_fedcare.pth")
+    torch.save(model.state_dict(), "checkpoints/msk_fedcare.pth")
 
 if __name__ == "__main__":
     args = parse_args()
-    train_digit_five(args)
+    msk(args)

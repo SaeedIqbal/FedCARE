@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
 
-class OfficeCaltechLoader(Dataset):
+class drLoader(Dataset):
     def __init__(self, root, transform=None):
         self.root = root
         self.transform = transform or transforms.Compose([

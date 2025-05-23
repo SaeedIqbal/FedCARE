@@ -1,8 +1,8 @@
 import torch.nn as nn
 
-class DigitFiveCNN(nn.Module):
+class MSKCNN(nn.Module):
     def __init__(self, num_classes=10):
-        super(DigitFiveCNN, self).__init__()
+        super(MSKCNN, self).__init__()
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(3, 64, 5, stride=1, padding=2),
             nn.BatchNorm2d(64), nn.ReLU(), nn.MaxPool2d(2),

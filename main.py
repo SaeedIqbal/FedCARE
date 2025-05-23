@@ -4,7 +4,7 @@
 import torch
 import argparse
 from models.resnet import ResNet101
-from models.cnn import DigitFiveCNN
+from models.cnn import MSKCNN
 from utils.pruning import structured_prune
 from utils.quantization import QuantizedModel
 from utils.sparsification import TopKSparsifier
@@ -12,7 +12,7 @@ from utils.dp_smppc import DPSMPC
 
 def parse_args():
     parser = argparse.ArgumentParser(description="FedCARE Training")
-    parser.add_argument("--dataset", choices=["digit_five", "office", "office_caltech10"], required=True)
+    parser.add_argument("--dataset", choices=["MSK", "DR", "MM-WHS"], required=True)
     parser.add_argument("--prune", action="store_true")
     parser.add_argument("--quantize", action="store_true")
     parser.add_argument("--sparsify", action="store_true")
@@ -22,9 +22,9 @@ def parse_args():
 
 def train_fedcare(args):
     # Load dataset
-    if args.dataset == "digit_five":
-        model = DigitFiveCNN()
-        data_loader = "digit_five_loader"
+    if args.dataset == "MSK":
+        model = MSKCNN()
+        data_loader = "MSK_loader"
     elif args.dataset == "office":
         model = ResNet101()
         data_loader = "office_loader"
@@ -56,7 +56,7 @@ def train_fedcare(args):
             optimizer.zero_grad()
             output = model(x)
             loss = torch.nn.CrossEntropyLoss()(output, y)
-            if args.dataset == "digit_five" and args.sparsify:
+            if args.dataset == "MSK" and args.sparsify:
                 loss += 0.02 * model.idd_loss()  # Theorem 4
             loss.backward()
             optimizer.step()
@@ -74,7 +74,7 @@ if __name__ == "__main__":
 import torch
 import argparse
 from models.resnet import ResNet101
-from models.cnn import DigitFiveCNN
+from models.cnn import MSKCNN
 from utils.pruning import structured_prune
 from utils.quantization import QuantizedModel
 from utils.sparsification import TopKSparsifier
@@ -82,7 +82,7 @@ from utils.dp_smppc import DPSMPC
 
 def parse_args():
     parser = argparse.ArgumentParser(description="FedCARE Training")
-    parser.add_argument("--dataset", choices=["digit_five", "office", "office_caltech10"], required=True)
+    parser.add_argument("--dataset", choices=["MSK", "DR", "MM-WHS"], required=True)
     parser.add_argument("--prune", action="store_true")  # Lemma 1
     parser.add_argument("--quantize", action="store_true")  # Lemma 2
     parser.add_argument("--sparsify", action="store_true")  # Theorem 1–2
@@ -92,8 +92,8 @@ def parse_args():
 
 def train_fedcare(args):
     # Load dataset-specific model
-    if args.dataset == "digit_five":
-        model = DigitFiveCNN()
+    if args.dataset == "MSK":
+        model = MSKCNN()
     else:
         model = ResNet101()
 

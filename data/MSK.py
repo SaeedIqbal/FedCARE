@@ -3,7 +3,7 @@ import torchvision.transforms as transforms
 import os
 from PIL import Image
 
-class DigitFiveLoader(Dataset):
+class MSKLoader(Dataset):
     def __init__(self, root, transform=None):
         self.root = root
         self.transform = transform or transforms.Compose([
