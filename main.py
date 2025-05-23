@@ -68,3 +68,64 @@ def train_fedcare(args):
 if __name__ == "__main__":
     args = parse_args()
     train_fedcare(args)
+
+
+'''
+import torch
+import argparse
+from models.resnet import ResNet101
+from models.cnn import DigitFiveCNN
+from utils.pruning import structured_prune
+from utils.quantization import QuantizedModel
+from utils.sparsification import TopKSparsifier
+from utils.dp_smppc import DPSMPC
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="FedCARE Training")
+    parser.add_argument("--dataset", choices=["digit_five", "office", "office_caltech10"], required=True)
+    parser.add_argument("--prune", action="store_true")  # Lemma 1
+    parser.add_argument("--quantize", action="store_true")  # Lemma 2
+    parser.add_argument("--sparsify", action="store_true")  # Theorem 1–2
+    parser.add_argument("--dp", action="store_true")  # Theorem 3
+    parser.add_argument("--smpc", action="store_true")  # Lemma 4
+    return parser.parse_args()
+
+def train_fedcare(args):
+    # Load dataset-specific model
+    if args.dataset == "digit_five":
+        model = DigitFiveCNN()
+    else:
+        model = ResNet101()
+
+    # Apply structured pruning (Lemma 1)
+    if args.prune:
+        model = structured_prune(model, sparsity=0.4)  # s=40%
+
+    # Apply 8-bit quantization (Lemma 2)
+    if args.quantize:
+        model = QuantizedModel(model, bits=8)
+
+    # Apply top-k sparsification (Theorem 1–2)
+    sparsifier = TopKSparsifier(k=0.5)  # k=50%
+    if args.sparsify:
+        model = sparsifier(model)
+
+    # Apply DP+SMPC (Theorem 3 & Lemma 4)
+    if args.dp and args.smpc:
+        model = DPSMPC(model, epsilon=2)  # σ=1.9 at ε=2
+
+    # Training logic
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    for epoch in range(1000):  # E=5 local epochs
+        for x, y in data_loader:
+            optimizer.zero_grad()
+            output = model(x)
+            loss = torch.nn.CrossEntropyLoss()(output, y)
+            if args.sparsify:
+                loss += 0.02 * model.idd_loss()  # Theorem 4
+            loss.backward()
+            optimizer.step()
+
+    torch.save(model.state_dict(), f"checkpoints/{args.dataset}_fedcare.pth")
+    print(f"Training complete for {args.dataset} with FedCARE.")
+'''
